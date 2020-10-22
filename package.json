@@ -1,0 +1,15 @@
+{
+  "name": "appasistencias-backend",
+  "version": "1.0.0",
+  "description": "Backend para el proyecto final de la materia de Métodos ágiles",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon app.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1",
+    "nodemon": "^2.0.6"
+  }
+}
