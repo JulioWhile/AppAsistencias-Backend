@@ -59,43 +59,46 @@ router.post('/', (req, res) => {
 });
 
 
-router.put('/:id', (req, res) => {
+router.put('/:id', async (req, res) => {
+
     const { id } = req.params;
     const { nombre, fecha_inicio, fecha_fin, unidades } = req.body;
-    Cursos.updateOne(id, { // puede que sea necesario que en lugar de id sea {_id: id}
-        nombre, 
-        fecha_inicio: Date.parse(fecha_inicio), 
-        fecha_fin: Date.parse(fecha_fin), 
-        unidades, 
-    }, {}, (error, curso) => {
-        if (error) {
-            res.status(400).json({
-                success: false,
-                error
-            })
-        } else {
+    const curso = await Cursos.findById(id);
+
+    curso.nombre = nombre;
+    curso.fecha_inicio = Date.parse(fecha_inicio);
+    curso.fecha_fin = Date.parse(fecha_fin);
+    curso.unidades = unidades;
+
+    Cursos.updateOne({ _id: id }, curso, {}, (error, curso) => {
+        if (curso) {
             res.status(200).json({
                 success: true,
                 data: curso
             });
+        } else {
+            res.status(400).json({
+                success: false,
+                error
+            })
         }
-    });  
+    });
 });
 
 router.delete('/:id', (req, res) => {
     const { id } = req.params;
-    Cursos.deleteOne({_id: id}, (error) => {
-        if(error) {
+    Cursos.deleteOne({ _id: id }, (error) => {
+        if (error) {
             res.status(400).json({
                 success: false,
                 error
-            }); 
+            });
         } else {
             res.status(200).json({
                 success: true
             })
         }
-    }); 
+    });
 });
 
 module.exports = router; 

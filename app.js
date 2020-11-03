@@ -35,12 +35,12 @@ app.get('/', (req, res) => {
 // app.use('/alumnos', alumnosRoutes);
 
 // Rutas cursos:
-// const cursosRoutes = require('./routes/CursoRoutes');
-// app.use('/cursos', cursosRoutes);
+const cursosRoutes = require('./routes/CursoRoutes');
+app.use('/cursos', cursosRoutes);
 
 // Rutas grupos:
-// const gruposRoutes = require('./routes/GrupoRoutes');
-// app.use('/grupos', gruposRoutes);
+const gruposRoutes = require('./routes/GrupoRoutes');
+app.use('/grupos', gruposRoutes);
 
 // rutas asistencias
 // const asistenciasRoutes = require('./routes/AsistenciaRoutes');
