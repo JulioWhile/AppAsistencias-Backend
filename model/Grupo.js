@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const Curso = new Schema({
-    dias: Array,
+    dias: String,
     hora: String, // identificador, "nombre" de grupo (no hace falta evaluar periodos)
 })
 
