@@ -4,7 +4,7 @@ const router = express.Router();
 const Asistencias = require('../model/Asistencia');
 
 router.get('/', (req, res) => {
-    Asistencia.find({}, (error, asistencias) => {
+    Asistencias.find({}, (error, asistencias) => {
         if (error) {
             res.status(400).json({
                 success: false,
@@ -21,7 +21,7 @@ router.get('/', (req, res) => {
 
 router.get('/:id', (req, res) => {
     const { id } = req.params;
-    Asistencia.findById(id, (error, asistencia) => {
+    Asistencias.findById(id, (error, asistencia) => {
         if (error) {
             res.status(400).json({
                 success: false,
@@ -39,7 +39,7 @@ router.get('/:id', (req, res) => {
 
 router.post('/', (req, res) => {
     const curso = req.body;
-    Asistencia.create(curso, (error, asistencia_nueva) => {
+    Asistencias.create(curso, (error, asistencia_nueva) => {
         if (error) {
             res.status(400).json({
                 success: false,
@@ -58,7 +58,7 @@ router.post('/', (req, res) => {
 router.put('/:id', async (req, res) => {
     const { id } = req.params;
     const asistencia = req.body;
-    Asistencia.updateOne({ _id: id }, asistencia, {}, (error, asistencia_actualizada) => {
+    Asistencias.updateOne({ _id: id }, asistencia, {}, (error, asistencia_actualizada) => {
         if (curso) {
             res.status(200).json({
                 success: true,
@@ -75,7 +75,7 @@ router.put('/:id', async (req, res) => {
 
 router.delete('/:id', (req, res) => {
     const { id } = req.params;
-    Asistencia.deleteOne({ _id: id }, (error) => {
+    Asistencias.deleteOne({ _id: id }, (error) => {
         if (error) {
             res.status(400).json({
                 success: false,

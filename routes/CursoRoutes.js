@@ -21,6 +21,7 @@ router.get('/', (req, res) => {
 
 router.get('/:id', (req, res) => {
     const { id } = req.params;
+    console.log(id);
     Cursos.findById(id, (error, curso) => {
         if (error) {
             res.status(400).json({
@@ -28,10 +29,18 @@ router.get('/:id', (req, res) => {
                 error
             })
         } else {
-            res.status(200).json({
-                success: true,
-                data: curso
-            });
+            console.log(curso);
+            if(curso){
+                res.status(200).json({
+                    success: true,
+                    data: {curso}
+                });
+            }else{
+                res.status(404).json({
+                    success: false,
+                    error: 'Error. Recurso no encontrado'
+                })
+            }
         }
     });
 });
@@ -58,7 +67,7 @@ router.post('/', (req, res) => {
 router.put('/:id', async (req, res) => {
     const { id } = req.params;
     const curso = req.body;
-    Cursos.updateOne({ _id: id }, curso, {}, (error, curso_actualizado) => {
+    Cursos.updateOne({ _id: id }, curso, (error, curso_actualizado) => {
         if (curso) {
             res.status(200).json({
                 success: true,
