@@ -36,14 +36,10 @@ router.get('/:id', (req, res) => {
     });
 });
 
+
 router.post('/', (req, res) => {
-    const { nombre, fecha_inicio, fecha_fin, unidades } = req.body;
-    Cursos.create({
-        nombre,
-        fecha_inicio: Date.parse(fecha_inicio),
-        fecha_fin: Date.parse(fecha_fin),
-        unidades,
-    }, (error, curso) => {
+    const curso = req.body;
+    Cursos.create(curso, (error, curso_nuevo) => {
         if (error) {
             res.status(400).json({
                 success: false,
@@ -52,7 +48,7 @@ router.post('/', (req, res) => {
         } else {
             res.status(200).json({
                 success: true,
-                data: curso
+                data: curso_nuevo
             });
         }
     });
@@ -60,21 +56,13 @@ router.post('/', (req, res) => {
 
 
 router.put('/:id', async (req, res) => {
-
     const { id } = req.params;
-    const { nombre, fecha_inicio, fecha_fin, unidades } = req.body;
-    const curso = await Cursos.findById(id);
-
-    curso.nombre = nombre;
-    curso.fecha_inicio = Date.parse(fecha_inicio);
-    curso.fecha_fin = Date.parse(fecha_fin);
-    curso.unidades = unidades;
-
-    Cursos.updateOne({ _id: id }, curso, {}, (error, curso) => {
+    const curso = req.body;
+    Cursos.updateOne({ _id: id }, curso, {}, (error, curso_actualizado) => {
         if (curso) {
             res.status(200).json({
                 success: true,
-                data: curso
+                data: curso_actualizado
             });
         } else {
             res.status(400).json({

@@ -5,10 +5,11 @@ const mongoose = require('mongoose');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 
-const db = require('./db');
+const { url: dbURL } = require('./db');
+
 
 // añadir credenciales con db en la cadena
-// mongoose.connect(`${db.url}${db.name}`, { useNewUrlParser: true })
+// mongoose.connect(`${dbURL}`, { useNewUrlParser: true })
 //     .then(db => {
 //         console.log("Conectado a la base de datos.");
 //     })
@@ -28,23 +29,24 @@ app.get('/', (req, res) => {
 	res.json('Hello World!');
 });
 
-/* descomentar cuando esté conectado a la bdd */
-
-// Rutas alumnos:
-// const alumnosRoutes = require('./routes/AlumnoRoutes');
-// app.use('/alumnos', alumnosRoutes);
-
 // Rutas cursos:
 const cursosRoutes = require('./routes/CursoRoutes');
 app.use('/cursos', cursosRoutes);
 
-// Rutas grupos:
-const gruposRoutes = require('./routes/GrupoRoutes');
-app.use('/grupos', gruposRoutes);
-
-// rutas asistencias
+// rutas asistencias: 
 // const asistenciasRoutes = require('./routes/AsistenciaRoutes');
 // app.use('/asistencias', asistenciasRoutes);
+
+// ESTO PUEDE QUE SEA BORRADO EN EL FUTURO //
+// // Rutas alumnos:
+// // const alumnosRoutes = require('./routes/AlumnoRoutes');
+// // app.use('/alumnos', alumnosRoutes);
+
+// ESTO PUEDE QUE SEA BORRADO EN EL FUTURO //
+// // Rutas grupos:
+// // const gruposRoutes = require('./routes/GrupoRoutes');
+// // app.use('/grupos', gruposRoutes);
+
 
 // Escuchar al servidor
 const port = app.get('port');
