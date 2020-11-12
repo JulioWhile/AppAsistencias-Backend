@@ -51,6 +51,25 @@ router.get('/:id', (req, res) => {
     });
 });
 
+// para obtener los grupos de cierto curso
+router.get('/curso/:id', (req, res) => {
+    const { id } = req.params;
+    Cursos.find({ "_id": id }, (error, curso) => {
+        if (error) {
+            res.status(400).json({
+                success: false,
+                error
+            })
+        } else {
+            const grupos = curso.grupos;
+            res.status(200).json({
+                success: true,
+                data: grupos
+            });
+        }
+    });
+});
+
 router.post('/', async (req, res) => {
     const { curso_id, descripcion } = req.body;
     const curso = await Cursos.findById(curso_id);
