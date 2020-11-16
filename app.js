@@ -33,19 +33,19 @@ app.get('/', (req, res) => {
 const cursosRoutes = require('./routes/CursoRoutes');
 app.use('/cursos', cursosRoutes);
 
-// rutas asistencias: 
-const asistenciasRoutes = require('./routes/AsistenciaRoutes');
-app.use('/asistencias', asistenciasRoutes);
+// Rutas grupos:
+const gruposRoutes = require('./routes/GrupoRoutes');
+app.use('/grupos', gruposRoutes);
 
-// ESTO PUEDE QUE SEA BORRADO EN EL FUTURO //
-// // Rutas alumnos:
-// // const alumnosRoutes = require('./routes/AlumnoRoutes');
-// // app.use('/alumnos', alumnosRoutes);
 
-// ESTO PUEDE QUE SEA BORRADO EN EL FUTURO //
-// // Rutas grupos:
-// // const gruposRoutes = require('./routes/GrupoRoutes');
-// // app.use('/grupos', gruposRoutes);
+// Rutas asistencias: 
+// const asistenciasRoutes = require('./routes/AsistenciaRoutes');
+// app.use('/asistencias', asistenciasRoutes);
+
+// Rutas alumnos:
+// const alumnosRoutes = require('./routes/AlumnoRoutes');
+// app.use('/alumnos', alumnosRoutes);
+
 
 
 // Escuchar al servidor
