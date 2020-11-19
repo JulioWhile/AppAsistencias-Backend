@@ -7,15 +7,15 @@ const bodyParser = require('body-parser');
 
 const { url: dbURL } = require('./db');
 
-
 // añadir credenciales con db en la cadena
-mongoose.connect(`${dbURL}`, { useNewUrlParser: true })
-    .then(db => {
-        console.log("Conectado a la base de datos.");
-    })
-    .catch(err => {
-        console.log("Error en la conexión: " + err);
-    });
+mongoose
+	.connect(`${dbURL}`, { useNewUrlParser: true })
+	.then((db) => {
+		console.log('Conectado a la base de datos.');
+	})
+	.catch((err) => {
+		console.log('Error en la conexión: ' + err);
+	});
 
 // configuraciones
 app.set('port', process.env.PORT || 3001);
@@ -33,20 +33,17 @@ app.get('/', (req, res) => {
 const cursosRoutes = require('./routes/CursoRoutes');
 app.use('/cursos', cursosRoutes);
 
-// rutas asistencias: 
-const asistenciasRoutes = require('./routes/AsistenciaRoutes');
-app.use('/asistencias', asistenciasRoutes);
+// Rutas grupos:
+const gruposRoutes = require('./routes/GrupoRoutes');
+app.use('/grupos', gruposRoutes);
 
-// ESTO PUEDE QUE SEA BORRADO EN EL FUTURO //
-// // Rutas alumnos:
-// // const alumnosRoutes = require('./routes/AlumnoRoutes');
-// // app.use('/alumnos', alumnosRoutes);
+// Rutas asistencias:
+// const asistenciasRoutes = require('./routes/AsistenciaRoutes');
+// app.use('/asistencias', asistenciasRoutes);
 
-// ESTO PUEDE QUE SEA BORRADO EN EL FUTURO //
-// // Rutas grupos:
-// // const gruposRoutes = require('./routes/GrupoRoutes');
-// // app.use('/grupos', gruposRoutes);
-
+// Rutas alumnos:
+// const alumnosRoutes = require('./routes/AlumnoRoutes');
+// app.use('/alumnos', alumnosRoutes);
 
 // Escuchar al servidor
 const port = app.get('port');
