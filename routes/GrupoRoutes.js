@@ -111,7 +111,7 @@ router.put('/:id', async (req, res) => {
         if (error) {
             res.status(404).json({
                 success: false,
-                error: 'El id del curso no se encuentra registrado'
+                error
             });
         } else {
             let actualizado = false;
@@ -144,11 +144,6 @@ router.put('/:id', async (req, res) => {
             });
         }
     });
-    // const curso = await Cursos.findById(curso_id);
-
-
-
-    // console.log(curso); 
 });
 
 

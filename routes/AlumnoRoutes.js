@@ -116,88 +116,88 @@ router.post('/', async (req, res) => {
     });
 });
 
-/* 
-
-FALTA POR HACER EL PUT Y EL DELETE
-
-Lo de abajo es lo mismo que está en GrupoRoutes.js
-
-*/
-
-// router.put('/:id', (req, res) => {
+// router.put('/:id', async (req, res) => {
 //     const { id } = req.params;
-//     const { curso_id, descripcion } = req.body;
-//     const curso = await Cursos.findById(curso_id);
+//     const { nombre } = req.body;
 
-//     if (!curso) {
-//         res.status(404).json({
-//             success: false,
-//             error: 'El id del curso no se encuentra registrado'
-//         });
-//     }
-//     let actualizado = false;
-
-//     for (let i = 0; i < curso.grupos.length; i++) {
-//         // se verifica que exista el arreglo de grupos y después se comprueba el id
-//         if (curso.grupos && curso.grupos[i]._id === id) {
-//             curso.grupos[i].descripcion = descripcion;
-//             actualizado = true;
-//         }
-//     }
-
-//     Cursos.updateOne({ _id: curso_id }, curso, {}, (error, curso) => {
+//     Cursos.find({ "grupos.alumnos._id": id }, (error, [curso]) => {
+//         const { _id: curso_id } = curso;
 //         if (error) {
-//             res.status(400).json({
+//             res.status(404).json({
 //                 success: false,
 //                 error
 //             });
-//         } else if (!actualizado) {
-//             res.status(404).json({
-//                 success: false,
-//                 error: `No se encontró el grupo con el id ${id} del curso ${curso_id}`
-//             });
 //         } else {
-//             res.status(200).json({
-//                 success: true,
-//                 data: curso
+//             let actualizado = false;
+
+//             for (let i = 0; i < curso.grupos.length; i++) {
+//                 // se verifica que exista el arreglo de grupos y después se comprueba el id
+//                 if (curso.grupos && curso.grupos[i]._id.toString() === id) {
+//                     curso.grupos[i].descripcion = descripcion;
+//                     actualizado = true;
+//                 }
+//             }
+
+//             Cursos.updateOne({ _id: curso_id }, curso, {}, (error, curso) => {
+//                 if (error) {
+//                     res.status(400).json({
+//                         success: false,
+//                         error
+//                     });
+//                 } else if (!actualizado) {
+//                     res.status(404).json({
+//                         success: false,
+//                         error: `No se encontró el grupo con el id ${id} del curso ${curso_id}`
+//                     });
+//                 } else {
+//                     res.status(200).json({
+//                         success: true,
+//                         data: curso
+//                     });
+//                 }
 //             });
 //         }
 //     });
 // });
 
 
-// router.delete('/:id', (req, res) => {
-//     const { curso_id } = req.body;
-//     const { id } = req.params;
+router.delete('/:id', async (req, res) => {
+    const { id } = req.params;
 
-//     const curso = await Cursos.findById(curso_id);
-//     const eliminado = false;
+    Cursos.find({ "grupos._id": id }, (error, [curso]) => {
 
-//     for (let i = 0; i < curso.grupos; i++) {
-//         if (curso.grupos && curso.grupos[i] === id) {
-//             curso.grupos.splice(i, 1);
-//             eliminado = true;
-//         }
-//     }
+        const { _id: curso_id } = curso;
+        let eliminado = false;
+        console.log(curso);
 
-//     Cursos.updateOne({ _id: curso_id }, curso, {}, (error, curso) => {
-//         if (error) {
-//             res.status(400).json({
-//                 success: false,
-//                 error
-//             });
-//         } else if (!eliminado) {
-//             res.status(404).json({
-//                 success: false,
-//                 error: `No se encontró el grupo con el id ${id} del curso ${curso_id}`
-//             });
-//         } else {
-//             res.status(200).json({
-//                 success: true,
-//                 data: curso
-//             });
-//         }
-//     });
-// });
+        curso.grupos = curso.grupos && curso.grupos.reduce((acc, grupo) => {
+            acc.push(grupo.alumnos.filter(alumno=> {
+                eliminado = true; 
+                return alumno._id !== id; 
+            })); 
+            return acc; 
+        }, []);
 
-// module.exports = router; 
+        Cursos.updateOne({ _id: curso_id }, curso, {}, (error, curso) => {
+            if (error) {
+                res.status(400).json({
+                    success: false,
+                    error
+                });
+            } else if (!eliminado) {
+                res.status(404).json({
+                    success: false,
+                    error: `No se encontró el alumno con el id ${id} del curso ${curso_id}`
+                });
+            } else {
+                res.status(200).json({
+                    success: true,
+                    data: curso
+                });
+            }
+        });
+    });
+
+});
+
+module.exports = router; 
