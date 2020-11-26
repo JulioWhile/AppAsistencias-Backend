@@ -28,12 +28,12 @@ router.get('/:id', (req, res) => {
                 error
             })
         } else {
-            if(curso){
+            if (sesion) {
                 res.status(200).json({
                     success: true,
-                    data: {curso}
+                    data: { sesion }
                 });
-            }else{
+            } else {
                 res.status(404).json({
                     success: false,
                     error: `La sesión con el id ${id} no se encuentra registrada`
@@ -43,10 +43,40 @@ router.get('/:id', (req, res) => {
     });
 });
 
+router.get('/grupo/:id', (req, res) => {
+    const { id: grupo_id } = req.params;
+    Sesiones.find({}, (error, sesiones) => {
+        if (error) {
+            res.status(400).json({
+                success: false,
+                error
+            })
+        } else {
+            if (sesiones) {
+                console.log(`sesiones: ${sesiones}`); 
+                let sesionesFiltradas = sesiones.filter(ses => {
+                    console.log(`${ses.grupo_id.toString()} === ${grupo_id} ? -> ${ses.grupo_id.toString() === grupo_id}`); 
+                    return ses.grupo_id.toString() === grupo_id
+                });
+                console.log(`sesionesFiltradas: ${sesionesFiltradas}`); 
+                res.status(200).json({
+                    success: true,
+                    data: sesionesFiltradas
+                });
+            } else {
+                res.status(404).json({
+                    success: false,
+                    error: `No se encontraron sesiones`
+                })
+            }
+        }
+    });
+});
 
 router.post('/', (req, res) => {
-    const sesion = req.body;
-    Sesion.create(sesion, (error, sesion_nueva) => {
+    const { sesion } = req.body;
+
+    Sesiones.create(sesion, (error, sesion_nueva) => {
         if (error) {
             res.status(400).json({
                 success: false,
@@ -63,18 +93,31 @@ router.post('/', (req, res) => {
 
 router.put('/:id', async (req, res) => {
     const { id } = req.params;
-    const sesion = req.body;
-    Sesiones.updateOne({ _id: id }, sesion, (error, sesion_actualizada) => {
-        if (sesion) {
-            res.status(200).json({
-                success: true,
-                data: sesion_actualizada
-            });
-        } else {
-            res.status(400).json({
+    const { sesion: { fecha, asistencias } } = req.body;
+
+    Sesiones.findById(id, (error, sesion) => {
+        if (error) {
+            res.status(404).json({
                 success: false,
                 error
-            })
+            });
+        } else {
+            sesion.fecha = fecha;
+            sesion.asistencias = asistencias;
+
+            Sesiones.updateOne({ _id: curso_id }, sesion, {}, (error, sesion) => {
+                if (error) {
+                    res.status(400).json({
+                        success: false,
+                        error
+                    });
+                } else {
+                    res.status(200).json({
+                        success: true,
+                        data: sesion
+                    });
+                }
+            });
         }
     });
 });

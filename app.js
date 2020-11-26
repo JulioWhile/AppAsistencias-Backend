@@ -42,8 +42,12 @@ app.use('/grupos', gruposRoutes);
 // app.use('/asistencias', asistenciasRoutes);
 
 // Rutas alumnos:
-// const alumnosRoutes = require('./routes/AlumnoRoutes');
-// app.use('/alumnos', alumnosRoutes);
+const alumnosRoutes = require('./routes/AlumnoRoutes');
+app.use('/alumnos', alumnosRoutes);
+
+// Rutas sesiones
+const sesionesRoutes = require('./routes/SesionRoutes'); 
+app.use('/sesiones', sesionesRoutes); 
 
 // Escuchar al servidor
 const port = app.get('port');

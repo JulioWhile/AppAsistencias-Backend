@@ -75,6 +75,7 @@ router.post('/', async (req, res) => {
     const { curso_id, descripcion } = req.body;
     const curso = await Cursos.findById(curso_id);
     if (!curso) {
+        /\.csv$/
         res.status(404).json({
             success: false,
             error: 'El id del curso no se encuentra registrado'

@@ -2,10 +2,10 @@ const mongoose = require('mongoose');
 const { Schema, ObjectId } = mongoose;
 
 const Sesion = new Schema({
-    grupo_id: ObjectId,
+    grupo_id: String,
     fecha: Date,
     asistencias: [{
-        alumno_id: ObjectId,
+        alumno_id: String,
         nombre_alumno: String,
         asistio: Boolean
     }]

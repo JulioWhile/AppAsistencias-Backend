@@ -13,7 +13,7 @@ router.get('/', (req, res) => {
                 error
             })
         } else {
-            let alumnos = []; //add, delete, has, clear, size
+            let alumnos = []; 
             // por cada curso...
             cursos.forEach(cur => {
                 if (cur.grupos) {
@@ -25,6 +25,7 @@ router.get('/', (req, res) => {
                             const newAlumnos = gru.alumnos.map(alu => {
                                 alu.curso = cur.nombre;
                                 alu.grupo = gru.descripcion;
+                                return alu; 
                             });
                             alumnos = [...alumnos, ...newAlumnos];
                         }
@@ -43,7 +44,7 @@ router.get('/', (req, res) => {
 
 router.get('/:id', (req, res) => {
     const { id } = req.params;
-    Cursos.find({ "grupos.alumnos._id": id }, (error, curso) => {
+    Cursos.find({ "grupos.alumnos._id": id }, (error, [ curso ]) => {
         if (error) {
             res.status(400).json({
                 success: false,
@@ -58,7 +59,7 @@ router.get('/:id', (req, res) => {
                 // si existen alumnos en el grupo con la posición i
                 if (curso.grupos[i].alumnos) {
                     // buscamos si en los alumnos de este grupo existe el solicitado 
-                    alumno = curso.grupos[i].alumnos.find(alu => alu._id === id);
+                    alumno = curso.grupos[i].alumnos.find(alu => alu._id.toString() === id);
                 }
                 i++;
             }
@@ -86,7 +87,7 @@ router.post('/', async (req, res) => {
             error: `El curso con el id ${curso_id} no se encuentra registrado`
         });
     }
-    const idxGrupo = curso.grupos.findIndex(gru => gru._id === grupo_id);
+    const idxGrupo = curso.grupos.findIndex(gru => gru._id.toString() === grupo_id);
 
     // si no se encontró el grupo
     if (idxGrupo === -1) {
@@ -101,6 +102,43 @@ router.post('/', async (req, res) => {
         nombre,
     })
 
+    Cursos.updateOne({ _id: curso_id }, curso, {}, (error, curso) => {
+        if (curso) {
+            res.status(200).json({
+                success: true,
+                data: curso
+            });
+        } else {
+            res.status(400).json({
+                success: false,
+                error
+            })
+        }
+    });
+});
+
+// guardar varios alumnos
+router.post('/many', async (req, res) => {
+    const { curso_id, grupo_id, alumnos } = req.body;
+    const curso = await Cursos.findById(curso_id);
+    if (!curso) {
+        res.status(404).json({
+            success: false,
+            error: `El curso con el id ${curso_id} no se encuentra registrado`
+        });
+    }
+    const idxGrupo = curso.grupos.findIndex(gru => gru._id.toString() === grupo_id);
+
+    // si no se encontró el grupo
+    if (idxGrupo === -1) {
+        res.status(404).json({
+            success: false,
+            error: `El grupo con el id ${curso_id} no se encuentra registrado`
+        });
+    }
+    // LOS AGREGA, NO VALIDA SI SE LLAMAN IGUAL
+    curso.grupos[idxGrupo].alumnos = [...curso.grupos[idxGrupo].alumnos, ...alumnos]; 
+    
     Cursos.updateOne({ _id: curso_id }, curso, {}, (error, curso) => {
         if (curso) {
             res.status(200).json({
