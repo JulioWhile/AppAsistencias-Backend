@@ -43,6 +43,11 @@ router.get('/:id', (req, res) => {
     });
 });
 
+router.get('/curso/:id', (req, res) => {
+
+    // TODO
+});
+
 router.get('/grupo/:id', (req, res) => {
     const { id: grupo_id } = req.params;
     Sesiones.find({}, (error, sesiones) => {
