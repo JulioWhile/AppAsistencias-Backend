@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 
 const Sesiones = require('../model/Sesion');
+const Cursos = require('../model/Curso'); // utilizado para hacer la consulta de sesiones por curso
+
 
 router.get('/', (req, res) => {
     Sesiones.find({}, (error, sesiones) => {
@@ -44,9 +46,61 @@ router.get('/:id', (req, res) => {
 });
 
 router.get('/curso/:id', (req, res) => {
-    // se va a usar Cursos para obtener los IDs de todos los grupos dentro del curso. 
-    // se van a filtrar todas aquellas asistencias que pertenezcan a los grupos
-    // TODO
+    const { id } = req.params;
+    Cursos.find({ "_id": id }, (error, [ curso ] ) => {
+        if (error) {
+            res.status(400).json({
+                success: false,
+                error
+            });
+        } else if (curso && curso.grupos) {
+            const grupos = curso.grupos;
+
+            Sesiones.find({}, (error, sesiones) => {
+                if (error) {
+                    res.status(400).json({
+                        success: false,
+                        error
+                    })
+                } else if (sesiones) {
+
+                    let sesiones_curso = sesiones.filter( sesion => {
+                        grupos.forEach( (grupo) => {
+                            if(grupo._id.toString() === sesion.grupo_id) {
+                                return true; 
+                            }
+                        });
+                        return false; 
+                    })
+
+                    // con reduce, puede que no sea necesario
+                    // let sesiones_curso = sesiones.reduce((acc, sesion) => {
+                    //     grupos.forEach((grupo, i) =>{
+                    //         if(grupo._id.toString() === sesion.grupo_id) {
+                    //             acc[i].push(sesion); 
+                    //             return acc; 
+                    //         }
+                    //     })
+                    // }, Array(grupos.length).fill([])); 
+
+                    res.status(200).json({
+                        success: true,
+                        data: sesiones_curso
+                    });
+                } else {
+                    res.status(404).json({
+                        success: false,
+                        error: `No se encontraron sesiones`
+                    });
+                }
+            });
+        } else {
+            res.status(404).json({
+                success: false,
+                error: `No se encontró el curso`
+            });
+        }
+    });
 });
 
 router.get('/grupo/:id', (req, res) => {
@@ -61,7 +115,6 @@ router.get('/grupo/:id', (req, res) => {
             if (sesiones) {
                 console.log(`sesiones: ${sesiones}`); 
                 let sesionesFiltradas = sesiones.filter(ses => {
-                    console.log(`${ses.grupo_id.toString()} === ${grupo_id} ? -> ${ses.grupo_id.toString() === grupo_id}`); 
                     return ses.grupo_id.toString() === grupo_id
                 });
                 console.log(`sesionesFiltradas: ${sesionesFiltradas}`); 
