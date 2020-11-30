@@ -3,6 +3,7 @@ const { Schema, ObjectId } = mongoose;
 
 const Sesion = new Schema({
     grupo_id: String,
+    unidad: Number,
     fecha: Date,
     asistencias: [{
         alumno_id: String,

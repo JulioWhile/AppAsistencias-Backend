@@ -44,7 +44,8 @@ router.get('/:id', (req, res) => {
 });
 
 router.get('/curso/:id', (req, res) => {
-
+    // se va a usar Cursos para obtener los IDs de todos los grupos dentro del curso. 
+    // se van a filtrar todas aquellas asistencias que pertenezcan a los grupos
     // TODO
 });
 
@@ -98,7 +99,7 @@ router.post('/', (req, res) => {
 
 router.put('/:id', async (req, res) => {
     const { id } = req.params;
-    const { sesion: { fecha, asistencias } } = req.body;
+    const { sesion: { fecha, unidad, asistencias } } = req.body;
 
     Sesiones.findById(id, (error, sesion) => {
         if (error) {
@@ -108,6 +109,7 @@ router.put('/:id', async (req, res) => {
             });
         } else {
             sesion.fecha = fecha;
+            sesion.unidad = unidad; 
             sesion.asistencias = asistencias;
 
             Sesiones.updateOne({ _id: curso_id }, sesion, {}, (error, sesion) => {
