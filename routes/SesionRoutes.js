@@ -64,24 +64,25 @@ router.get('/curso/:id', (req, res) => {
                     })
                 } else if (sesiones) {
 
-                    let sesiones_curso = sesiones.filter( sesion => {
-                        grupos.forEach( (grupo) => {
-                            if(grupo._id.toString() === sesion.grupo_id) {
-                                return true; 
-                            }
-                        });
-                        return false; 
-                    })
+                    // let sesiones_curso = sesiones.filter( sesion => {
+                    //     grupos.forEach( (grupo) => {
+                    //         if(grupo._id.toString() === sesion.grupo_id) {
+                    //             return true; 
+                    //         }
+                    //     });
+                    //     return false; 
+                    // })
 
                     // con reduce, puede que no sea necesario
-                    // let sesiones_curso = sesiones.reduce((acc, sesion) => {
-                    //     grupos.forEach((grupo, i) =>{
-                    //         if(grupo._id.toString() === sesion.grupo_id) {
-                    //             acc[i].push(sesion); 
-                    //             return acc; 
-                    //         }
-                    //     })
-                    // }, Array(grupos.length).fill([])); 
+                    // la diferencia con la anterior búsqueda, es que en esta se retorna un arreglo por grupos 
+                    let sesiones_curso = sesiones.reduce((acc, sesion) => {
+                        grupos.forEach((grupo, i) =>{
+                            if(grupo._id.toString() === sesion.grupo_id) {
+                                acc[i].push(sesion); 
+                                return acc; 
+                            }
+                        })
+                    }, Array(grupos.length).fill([])); 
 
                     res.status(200).json({
                         success: true,
