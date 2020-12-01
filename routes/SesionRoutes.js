@@ -75,14 +75,22 @@ router.get('/curso/:id', (req, res) => {
 
                     // con reduce, puede que no sea necesario
                     // la diferencia con la anterior búsqueda, es que en esta se retorna un arreglo por grupos 
+                    let array = grupos.reduce(acc=> {
+                        acc.push([]); 
+                        return acc; 
+                    }, []); 
+                    console.log(`array: ${array}`); 
                     let sesiones_curso = sesiones.reduce((acc, sesion) => {
+                        
                         grupos.forEach((grupo, i) =>{
                             if(grupo._id.toString() === sesion.grupo_id) {
+                                console.log(`la sesión es del grupo ${grupo}, en el índice ${i}; el tamaño de acc = ${acc.length}`)
                                 acc[i].push(sesion); 
                                 return acc; 
                             }
-                        })
-                    }, Array(grupos.length).fill([])); 
+                        }); 
+                        return acc; 
+                    }, array); 
 
                     res.status(200).json({
                         success: true,
