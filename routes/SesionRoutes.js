@@ -141,9 +141,9 @@ router.get('/grupo/:id', (req, res) => {
     });
 });
 
-router.get('/alumno/:id', (req, res) => {
-    const id_alumno = req.params.id;
-
+router.get('/alumno/:nombre', (req, res) => {
+    const nombre_alumno = req.params.nombre;
+    console.log(`nombre del alumno: ${nombre_alumno}`);
     // PRIMERO BUSCAMOS CURSOS
     Cursos.find({}, (error, cursos) => {
         if (error) {
@@ -177,27 +177,28 @@ router.get('/alumno/:id', (req, res) => {
                     let clases_alumno = []; // {curso_id, curso_nombre, grupo_id, grupo_descripcion, alumno_id, alumno_nombre, sesiones=[]}; 
                     CURSOS: // Por cada curso
                     for (let i = 0; i < cursos.length; i++) {
-                        let curi = curso[i];
+                        let curi = cursos[i];
                         if (!curi || !curi.grupos) continue CURSOS; // si no es válido, buscamos con el siguiente curso
 
                         GRUPOS: // Por cada grupo dentro del curso
                         for (let j = 0; j < curi.grupos.length; j++) {
                             let grui = curi.grupos[j];
+                            console.log(`grupo: ${grui.descripcion} en el curso: ${curi.nombre}, tiene alumnos: ${grui.alumnos}`); 
                             if (!grui || !grui.alumnos) continue GRUPOS;
 
                             ALUMNOS: // Por cada alumno dentro del curso
                             for (let k = 0; k < grui.alumnos.length; k++) {
-                                let alui = curi.grui.alumnos[k];
+                                let alui = grui.alumnos[k];
                                 if (!alui) continue ALUMNOS;
 
-                                if (alui._id.toString() === id_alumno.toString()) {
+                                if (alui.nombre.toString() === nombre_alumno.toString()) {
                                     let obj_alumno = {
                                         curso_id: curi._id.toString(),
                                         curso_nombre: curi.nombre,
                                         grupo_id: grui._id.toString(),
                                         grupo_descripcion: grui.descripcion,
-                                        alumno_id: id_alumno,
-                                        alumno_nombre: alui.nombre,
+                                        // alumno_id: id_alumno,
+                                        alumno_nombre: nombre_alumno,
                                         sesiones: []
                                     };
                                     clases_alumno.push(obj_alumno);
@@ -219,7 +220,7 @@ router.get('/alumno/:id', (req, res) => {
                         sesiones.forEach((sesion) => {
                             for (let i = 0; i < clases_alumno.length; i++) {
                                 if (clases_alumno[i].grupo_id === sesion.grupo_id) {
-                                    let alu = sesion.asistencias.find(a => a.alumno_id === id_alumno);
+                                    let alu = sesion.asistencias.find(a => a.nombre_alumno === nombre_alumno);
                                     if (alu) {
                                         clases_alumno[i].sesiones.push({
                                             unidad: sesion.unidad,
@@ -230,7 +231,6 @@ router.get('/alumno/:id', (req, res) => {
                                     break;
                                 }
                             }
-                            return acc;
                         });
                         res.status(200).json({
                             success: true,
