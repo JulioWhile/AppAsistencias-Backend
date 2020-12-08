@@ -47,7 +47,7 @@ router.get('/:id', (req, res) => {
 
 router.get('/curso/:id', (req, res) => {
     const { id } = req.params;
-    Cursos.find({ "_id": id }, (error, [ curso ] ) => {
+    Cursos.find({ "_id": id }, (error, [curso]) => {
         if (error) {
             res.status(400).json({
                 success: false,
@@ -75,22 +75,22 @@ router.get('/curso/:id', (req, res) => {
 
                     // con reduce, puede que no sea necesario
                     // la diferencia con la anterior búsqueda, es que en esta se retorna un arreglo por grupos 
-                    let array = grupos.reduce(acc=> {
-                        acc.push([]); 
-                        return acc; 
-                    }, []); 
-                    console.log(`array: ${array}`); 
+                    let array = grupos.reduce(acc => {
+                        acc.push([]);
+                        return acc;
+                    }, []);
+                    console.log(`array: ${array}`);
                     let sesiones_curso = sesiones.reduce((acc, sesion) => {
-                        
-                        grupos.forEach((grupo, i) =>{
-                            if(grupo._id.toString() === sesion.grupo_id) {
+
+                        grupos.forEach((grupo, i) => {
+                            if (grupo._id.toString() === sesion.grupo_id) {
                                 console.log(`la sesión es del grupo ${grupo}, en el índice ${i}; el tamaño de acc = ${acc.length}`)
-                                acc[i].push(sesion); 
-                                return acc; 
+                                acc[i].push(sesion);
+                                return acc;
                             }
-                        }); 
-                        return acc; 
-                    }, array); 
+                        });
+                        return acc;
+                    }, array);
 
                     res.status(200).json({
                         success: true,
@@ -122,11 +122,11 @@ router.get('/grupo/:id', (req, res) => {
             })
         } else {
             if (sesiones) {
-                console.log(`sesiones: ${sesiones}`); 
+                console.log(`sesiones: ${sesiones}`);
                 let sesionesFiltradas = sesiones.filter(ses => {
                     return ses.grupo_id.toString() === grupo_id
                 });
-                console.log(`sesionesFiltradas: ${sesionesFiltradas}`); 
+                console.log(`sesionesFiltradas: ${sesionesFiltradas}`);
                 res.status(200).json({
                     success: true,
                     data: sesionesFiltradas
@@ -137,6 +137,108 @@ router.get('/grupo/:id', (req, res) => {
                     error: `No se encontraron sesiones`
                 })
             }
+        }
+    });
+});
+
+router.get('/alumno/:id', (req, res) => {
+    const id_alumno = req.params.id;
+
+    // PRIMERO BUSCAMOS CURSOS
+    Cursos.find({}, (error, cursos) => {
+        if (error) {
+            res.status(400).json({
+                success: false,
+                error
+            });
+        } else if (!cursos || !cursos.length) {
+            res.status(404).json({
+                success: false,
+                error: 'No se encontraron cursos registrados.'
+            });
+        } else {
+
+            // LUEGO BUSCAMOS LAS SESIONES
+            Sesiones.find({}, (error, sesiones) => {
+                if (error) {
+                    res.status(400).json({
+                        success: false,
+                        error
+                    });
+                } else if (!sesiones || !sesiones.length) {
+                    res.status(404).json({
+                        success: false,
+                        error: 'No se encontraron sesiones registradas.'
+                    });
+                } else {
+
+                    // UNA VEZ TENEMOS QUE HAY CURSOS Y SESIONES //
+                    // Obtenemos los cursos en los que está presente el alumno
+                    let clases_alumno = []; // {curso_id, curso_nombre, grupo_id, grupo_descripcion, alumno_id, alumno_nombre, sesiones=[]}; 
+                    CURSOS: // Por cada curso
+                    for (let i = 0; i < cursos.length; i++) {
+                        let curi = curso[i];
+                        if (!curi || !curi.grupos) continue CURSOS; // si no es válido, buscamos con el siguiente curso
+
+                        GRUPOS: // Por cada grupo dentro del curso
+                        for (let j = 0; j < curi.grupos.length; j++) {
+                            let grui = curi.grupos[j];
+                            if (!grui || !grui.alumnos) continue GRUPOS;
+
+                            ALUMNOS: // Por cada alumno dentro del curso
+                            for (let k = 0; k < grui.alumnos.length; k++) {
+                                let alui = curi.grui.alumnos[k];
+                                if (!alui) continue ALUMNOS;
+
+                                if (alui._id.toString() === id_alumno.toString()) {
+                                    let obj_alumno = {
+                                        curso_id: curi._id.toString(),
+                                        curso_nombre: curi.nombre,
+                                        grupo_id: grui._id.toString(),
+                                        grupo_descripcion: grui.descripcion,
+                                        alumno_id: id_alumno,
+                                        alumno_nombre: alui.nombre,
+                                        sesiones: []
+                                    };
+                                    clases_alumno.push(obj_alumno);
+                                    break GRUPOS;
+                                }
+                                // {curso_id, curso_nombre, grupo_id, grupo_descripcion, alumno_id, alumno_nombre, sesiones=[]};                        
+                            }
+                        }
+                    }
+                    // UNA VEZ YA SE TIENEN LAS CLASES DEL ALUMNO
+                    // Validamos que se hayan encontrado cursos: 
+                    if (!clases_alumno.length) {
+                        res.status(404).json({
+                            success: false,
+                            error: 'No se encontró al alumno en ningún curso.'
+                        });
+                    } else {
+                        // clases_alumno tiene la info
+                        sesiones.forEach((sesion) => {
+                            for (let i = 0; i < clases_alumno.length; i++) {
+                                if (clases_alumno[i].grupo_id === sesion.grupo_id) {
+                                    let alu = sesion.asistencias.find(a => a.alumno_id === id_alumno);
+                                    if (alu) {
+                                        clases_alumno[i].sesiones.push({
+                                            unidad: sesion.unidad,
+                                            fecha: sesion.fecha,
+                                            asistio: alu.asistio
+                                        });
+                                    }
+                                    break;
+                                }
+                            }
+                            return acc;
+                        });
+                        res.status(200).json({
+                            success: true,
+                            data: clases_alumno
+                        });
+                    }
+                }
+            });
         }
     });
 });
@@ -171,7 +273,7 @@ router.put('/:id', async (req, res) => {
             });
         } else {
             sesion.fecha = fecha;
-            sesion.unidad = unidad; 
+            sesion.unidad = unidad;
             sesion.asistencias = asistencias;
 
             Sesiones.updateOne({ _id: curso_id }, sesion, {}, (error, sesion) => {
