@@ -47,67 +47,70 @@ router.get('/:id', (req, res) => {
 
 router.get('/curso/:id', (req, res) => {
     const { id } = req.params;
-    Cursos.find({ "_id": id }, (error, [curso]) => {
-        if (error) {
+    Cursos.find({ "_id": id }, (error, cursos) => {
+        if (error || !cursos) {
             res.status(400).json({
                 success: false,
                 error
             });
-        } else if (curso && curso.grupos) {
-            const grupos = curso.grupos;
-
-            Sesiones.find({}, (error, sesiones) => {
-                if (error) {
-                    res.status(400).json({
-                        success: false,
-                        error
-                    })
-                } else if (sesiones) {
-
-                    // let sesiones_curso = sesiones.filter( sesion => {
-                    //     grupos.forEach( (grupo) => {
-                    //         if(grupo._id.toString() === sesion.grupo_id) {
-                    //             return true; 
-                    //         }
-                    //     });
-                    //     return false; 
-                    // })
-
-                    // con reduce, puede que no sea necesario
-                    // la diferencia con la anterior búsqueda, es que en esta se retorna un arreglo por grupos 
-                    let array = grupos.reduce(acc => {
-                        acc.push([]);
-                        return acc;
-                    }, []);
-                    console.log(`array: ${array}`);
-                    let sesiones_curso = sesiones.reduce((acc, sesion) => {
-
-                        grupos.forEach((grupo, i) => {
-                            if (grupo._id.toString() === sesion.grupo_id) {
-                                console.log(`la sesión es del grupo ${grupo}, en el índice ${i}; el tamaño de acc = ${acc.length}`)
-                                acc[i].push(sesion);
-                                return acc;
-                            }
-                        });
-                        return acc;
-                    }, array);
-
-                    res.status(200).json({
-                        success: true,
-                        data: sesiones_curso
-                    });
-                } else {
-                    res.status(404).json({
-                        success: false,
-                        error: `No se encontraron sesiones`
-                    });
-                }
-            });
         } else {
-            res.status(404).json({
-                success: false,
-                error: `No se encontró el curso`
-            });
+            let [curso] = cursos;
+            if (curso && curso.grupos) {
+                const grupos = curso.grupos;
+    
+                Sesiones.find({}, (error, sesiones) => {
+                    if (error) {
+                        res.status(400).json({
+                            success: false,
+                            error
+                        })
+                    } else if (sesiones) {
+    
+                        // let sesiones_curso = sesiones.filter( sesion => {
+                        //     grupos.forEach( (grupo) => {
+                        //         if(grupo._id.toString() === sesion.grupo_id) {
+                        //             return true; 
+                        //         }
+                        //     });
+                        //     return false; 
+                        // })
+    
+                        // con reduce, puede que no sea necesario
+                        // la diferencia con la anterior búsqueda, es que en esta se retorna un arreglo por grupos 
+                        let array = grupos.reduce(acc => {
+                            acc.push([]);
+                            return acc;
+                        }, []);
+                        console.log(`array: ${array}`);
+                        let sesiones_curso = sesiones.reduce((acc, sesion) => {
+    
+                            grupos.forEach((grupo, i) => {
+                                if (grupo._id.toString() === sesion.grupo_id) {
+                                    console.log(`la sesión es del grupo ${grupo}, en el índice ${i}; el tamaño de acc = ${acc.length}`)
+                                    acc[i].push(sesion);
+                                    return acc;
+                                }
+                            });
+                            return acc;
+                        }, array);
+    
+                        res.status(200).json({
+                            success: true,
+                            data: sesiones_curso
+                        });
+                    } else {
+                        res.status(404).json({
+                            success: false,
+                            error: `No se encontraron sesiones`
+                        });
+                    }
+                });
+            } else {
+                res.status(404).json({
+                    success: false,
+                    error: `No se encontró el curso`
+                });
+            }
         }
     });
 });

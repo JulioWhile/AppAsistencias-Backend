@@ -42,15 +42,58 @@ router.get('/', (req, res) => {
 	});
 });
 
+router.get('/uniques', (req, res) => {
+	Cursos.find({}, (error, cursos) => {
+		if (error) {
+			res.status(400).json({
+				success: false,
+				error
+			});
+		} else if (!cursos || !cursos.length) {
+			res.status(404).json({
+				success: false,
+				error: 'No se encontraron cursos registrados.'
+			});
+		} else {
+
+			let alumnos = [];
+			// por cada curso...
+			cursos.forEach((cur) => {
+				if (cur.grupos) {
+					// ... revisamos cada grupo (si existen)
+					cur.grupos.forEach((gru) => {
+						// si existen alumnos
+						if (gru.alumnos) {
+							// modificamos el objeto para añadirle atributos extra
+							gru.alumnos.forEach(alu => {
+								alumnos.push(alu.nombre);
+							});
+						}
+					});
+				}
+			});
+
+			// eliminamos alumnos repetidos
+			let alumnosUnicos = [...new Set(alumnos)];
+
+			res.status(200).json({
+				success: true,
+				data: alumnosUnicos,
+			});
+		}
+	});
+});
+
 router.get('/:id', (req, res) => {
 	const { id } = req.params;
-	Cursos.find({ 'grupos.alumnos._id': id }, (error, [curso]) => {
+	Cursos.find({ 'grupos.alumnos._id': id }, (error, cursos) => {
 		if (error) {
 			res.status(400).json({
 				success: false,
 				error,
 			});
 		} else {
+			let [curso] = cursos;
 			let alumno;
 			let i = 0;
 			// mientras no se haya encontrad y el contador i esté iterando grupos
@@ -78,6 +121,7 @@ router.get('/:id', (req, res) => {
 		}
 	});
 });
+
 
 router.post('/', async (req, res) => {
 	const { curso_id, grupo_id, nombre } = req.body;
@@ -125,17 +169,19 @@ router.post('/', async (req, res) => {
 router.post('/many', async (req, res) => {
 	const { grupo_id, alumnos } = req.body;
 
-	Cursos.find({ 'grupos._id': grupo_id }, (error, [curso]) => {
-		console.log('curso', curso);
-		console.log('curso id', curso._id);
+	Cursos.find({ 'grupos._id': grupo_id }, (error, cursos) => {
+		// console.log('curso', curso);
+		// console.log('curso id', curso._id);
 
-		const { _id: curso_id } = curso;
-		if (error) {
+		if (error || !cursos) {
 			res.status(404).json({
 				success: false,
 				error,
 			});
 		} else {
+			let [curso] = cursos;
+			const { _id: curso_id } = curso;
+
 			const idxGrupo = curso.grupos.findIndex(
 				(gru) => gru._id.toString() === grupo_id
 			);
@@ -233,41 +279,53 @@ router.post('/many', async (req, res) => {
 router.delete('/:id', async (req, res) => {
 	const { id } = req.params;
 
-	Cursos.find({ 'grupos._id': id }, (error, [curso]) => {
-		const { _id: curso_id } = curso;
-		let eliminado = false;
-		console.log(curso);
+	Cursos.find({ 'grupos._id': id }, (error, cursos) => {
 
-		curso.grupos =
-			curso.grupos &&
-			curso.grupos.reduce((acc, grupo) => {
-				acc.push(
-					grupo.alumnos.filter((alumno) => {
-						eliminado = true;
-						return alumno._id !== id;
-					})
-				);
-				return acc;
-			}, []);
+		if (error || !cursos) {
+			res.status(404).json({
+				success: false,
+				error,
+			});
+		} else {
 
-		Cursos.updateOne({ _id: curso_id }, curso, {}, (error, curso) => {
-			if (error) {
-				res.status(400).json({
-					success: false,
-					error,
-				});
-			} else if (!eliminado) {
-				res.status(404).json({
-					success: false,
-					error: `No se encontró el alumno con el id ${id} del curso ${curso_id}`,
-				});
-			} else {
-				res.status(200).json({
-					success: true,
-					data: curso,
-				});
-			}
-		});
+
+			let [curso] = cursos;
+
+			const { _id: curso_id } = curso;
+			let eliminado = false;
+			console.log(curso);
+
+			curso.grupos =
+				curso.grupos &&
+				curso.grupos.reduce((acc, grupo) => {
+					acc.push(
+						grupo.alumnos.filter((alumno) => {
+							eliminado = true;
+							return alumno._id !== id;
+						})
+					);
+					return acc;
+				}, []);
+
+			Cursos.updateOne({ _id: curso_id }, curso, {}, (error, curso) => {
+				if (error) {
+					res.status(400).json({
+						success: false,
+						error,
+					});
+				} else if (!eliminado) {
+					res.status(404).json({
+						success: false,
+						error: `No se encontró el alumno con el id ${id} del curso ${curso_id}`,
+					});
+				} else {
+					res.status(200).json({
+						success: true,
+						data: curso,
+					});
+				}
+			});
+		}
 	});
 });
 
